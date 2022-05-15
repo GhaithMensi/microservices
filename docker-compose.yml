@@ -1,0 +1,77 @@
+version: "3.3"
+services:
+    server:
+        build: ./eureka_server
+        ports: 
+          - "8761:8761"
+        image: "eureka-server"
+    zuulgeteway:
+        build: ./zuul-gateway
+        ports: 
+        - "8880:8080"
+        image: "zuul-geteway"
+        depends_on:
+        - server
+    user:
+        build: ./user-service
+        ports:
+        - "8085:8085"
+        image: "user-service"
+        depends_on:
+        - server
+    order:
+        build: ./order-service
+        ports:
+        - "8082:8082"
+        image: "order-service"
+        depends_on:
+        - server
+        - db
+    productcatalog:
+        build: ./product_catalog_service
+        ports:
+        - "8083:8083"
+        image: "product-catalog-service"
+        depends_on:
+        - server
+        - db
+    productrecommendation:
+        build: ./product-recommendation-service
+        ports:
+        - "8084:8084"
+        image: "product-recommendation-service"
+        depends_on:
+        - server
+        - dbPostgres
+    marketplace:
+        build: ./marketplace-service
+        ports:
+        - "8081:8081"
+        image: "marketplace-service"
+        depends_on:
+        - server
+        - db
+    db:
+        image: mysql:5.7
+        restart: always
+        environment:
+          MYSQL_DATABASE: 'db'
+          MYSQL_ROOT_PASSWORD: '123'
+        ports:
+        - '3306:3306'
+        expose:
+        - '3306'
+        volumes:
+        - my-db:/var/lib/mysql
+    dbPostgres:
+        image: postgres:14.1-alpine
+        restart: always
+        environment:
+        - POSTGRES_USER=postgres
+        - POSTGRES_PASSWORD=postgres
+        ports:
+        - '5432:5432'
+        volumes: 
+        - my-db:/var/lib/postgresql/datadb
+volumes:
+    my-db:
